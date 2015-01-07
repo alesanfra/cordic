@@ -1,13 +1,37 @@
-\documentclass[12pt,a4paper,openright]{report}
+\documentclass[12pt,a4paper]{report}
+
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{graphicx}
+\usepackage{listings}
 \usepackage[left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{url} % formattazione url
+\usepackage{color}
+
+%colori
+\definecolor{lgrey}{rgb}{0.95,0.95,0.95}
+\definecolor{dblue}{rgb}{0,0,0.545}
+
+
+\lstset{
+	language=c++,
+	backgroundcolor=\color{white},
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{dblue}\bfseries,
+	commentstyle=\color{cyan}\itshape,
+	frame=lrtb,
+	columns=fullflexible,
+	showstringspaces=false,
+	breaklines=true
+}
+
+
+% Info
 \author{A. Sanfratello, A. Beconcini, F. Mola}
-\title{Tranformation from cartesian coordinates to polar coordinates using CORDIC}
+\title{Transformation from cartesian coordinates to polar coordinates using CORDIC}
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
@@ -16,10 +40,10 @@
 
 \begin{titlepage}
 \begin{center}
-	\includegraphics[scale=.60]{Unipi_logo.jpg}\\[3cm]
+	\includegraphics[scale=.60]{img/Unipi_logo.jpg}\\[3cm]
 	\textsc{\Large Digital System Design Project}
 	\HRule \\[0.4cm]
-{ \huge \bfseries Tranformation from cartesian coordinates to polar coordinates using CORDIC \\[0.4cm] }
+{ \huge \bfseries Transformation from cartesian coordinates to polar coordinates using CORDIC \\[0.4cm] }
 	\HRule \\[4cm]
 	\noindent
 	\begin{minipage}{0.4\textwidth}
@@ -47,15 +71,104 @@
 \chapter{Introduction}
 
 \section{The CORDIC algorithm}
+\label{cordic_alghorithm}
+The goal of this project is to design an integrated digital circuit which implements a converter from cartesian coordinates to polar ones, using the CORDIC algorithm.
+
+CORDIC is an acronym for \emph{COordinate Rotation DIgital Computer} and it was first described by Jack E. Volder in 1959.
+
+CORDIC has two mode of operation: \emph{rotation} and \emph{vector}. The former mode takes the coordinates of an input vector plus an angle of rotation and returns the new coordinates after the rotation has been applied.
+
+The vector mode can convert an input vector from cartesian to polar coordinates and its result depends on multiple iterations of the CORDIC rotation mode. Basically, vector mode rotates the input vector until its \emph{y} coordinate became 0, so the modulus of the given vector is exactly equal to the value of the \emph{x} coordinate of the rotated vector and its angle is equal to the opposite of the total rotation angle.\newline
+The rotation angle performed at $i$-th iteration $\alpha$ is
+
+\begin{equation}
+\alpha_{i} = \arctan \left(\dfrac{1}{2^i}\right)
+\end{equation}
+
+The reason for choosing such angles is that the rotated coordinates $x_{i+1}$ $y_{i+1}$  after $i$ rotation became
+
+\begin{equation}
+x_{i+1} = x_{i} - d_{i} \cdot y_{i} \cdot 2^{-i}
+\end{equation}
+
+\begin{equation}
+y_{i+1} = y_{i} + d_{i} \cdot x_{i} \cdot 2^{-i}
+\end{equation}
+
+Where $d_{i}$ is equal to $+1$ if $y_{i} < 0$ and $-1$ otherwise.
+
+The rotated coordinates can be computed using just sums and shift operation, as we can see in the previous equations.
+
+The rotation performed at each stage $i$ is equal to $\alpha_{i}$ and the total rotation is given by the sum of the previous contribution such that the total rotation performed at iteration $i+1$ is
+
+\begin{equation}
+z_{i+1} = z_{i} + d_{i} \arctan \left(\dfrac{1}{2^i}\right)
+\end{equation}
+
+
+The results of the $\arctan()$ function can be stored in a ROM since this algorithm has to apply this function to a limited set of value. Such set depends on the number of iteration we are interested in.
+
+Note that the CORDIC algorithm do not produce a correct output if input is equal to the null vector. In fact such input generates a null vector at every iteration while the total rotation angle keeps increasing. Such a behavior produces a wrong output.
+ 
+
+The aim of this work is to produce a component which implements the CORDIC vector mode.
 
 \section{Specification of requirements}
 
+\begin{center}
+\includegraphics[scale=.50]{img/cd.jpg}\\
+\end{center}
+Our network has five inputs and four outputs. \emph{x0} and \emph{y0} are the Cartesian coordinates which have to be transformed in polar coordinates. 
+
+After entering the values of these inputs the user has to put \emph{soc} to the high value (\emph{1}) to let the network starting the conversion. To obtain the result the user has to put again the input \emph{soc} to the low value (\emph{0}); when the output \emph{eoc} goes to the high value the result can be read as modulus and angle respectively in the outputs \emph{rho} and \emph{theta}, the values obtained are given in fixed point with a notation Q8.24 (8 bits for the integer part, 24 bits for the decimal part). 
+
+The value of the angle (\emph{theta}) is always correct and is given in radians, instead the value of the modulus (\emph{rho}) is correct if and  only if the output \emph{valid} is on the high value, otherwise it means that the value can't be represented on two's complement on the given number of bits. 
+
+The input \emph{rst} is low triggered.
 
 
+\chapter{Architecture}
 
-\chapter{Implementation}
+\section{Input and output notation}
+Our circuit deals with 32-bit inputs and outputs in Q8.24 fixed point notation. This means our network uses 8 bits for the integer part and 24 bits for the decimal part of its input and output data.
 
-\section{Architecture}
+This notation let us represent value in the interval $ \left[ -128; 127.9999999 \right]$ and it gives us enough precision to represent $2^{-24}$ radians.
+
+\section{Extender and is\textunderscore valid components}
+\begin{center}
+\includegraphics{img/isvalid.jpg}\\
+\end{center}
+The \emph{extender} is a component that simply extends the input of 2 bits, in particular this component extends the values of \emph{x0} and \emph{y0}. We compute these operations in order to ensure that the modulus can always be represented. In fact the maximum value that we can obtain from the modulus is when both \emph{x0} and \emph{y0} are equals and maximums and so the resultant modulus is:
+
+\begin{equation}
+x_{0} \cdot \sqrt{2} \cdot A_{n}
+\end{equation}
+
+where the last two values are constant and smaller than 2 and so...
+
+
+\section{ROM and addresses generator}
+In order to compute the rotation angle at each iteration, we need the value of $\alpha_{i}$ for each possible iteration $i$.\\
+As we said in \ref{cordic_alghorithm}, we use a 64x32bit ROM to store the arctan() values.
+
+The ROM is filled such that the first 25 location contain angles $\alpha$ like
+
+\begin{equation}
+\alpha_{i} = \arctan \left( - \dfrac{1}{2^{i}} \right) \mbox{ with} \; i \in \left[0; 24 \right]
+\end{equation}
+
+The location from address 32 to 56 are filled with angles $\alpha$ like
+
+\begin{equation}
+\alpha_{i} = \arctan \left(\dfrac{1}{2^{i}} \right) \mbox{ with} \; i \in \left[0; 24 \right]
+\end{equation}
+
+We can not go any further storing the arctan() values because we do not have enough precision to represent them.
+
+We choose to fill the remaining locations with zeros. Doing this, we do not modify the value of the output angle when the conversion is complete.
+
+\section{Counter}
+Since our circuit performs multiple iterations to reach the expected output values, we need a counter to stop the computation.
 
 \section{VHDL implementation}
 
@@ -70,6 +183,146 @@
 \subsection{Testing angle}
 
 \section{Generation of test data using C++}
+
+\begin{lstlisting}[caption={Test-data generation}]
+#include <stdio.h>
+#include <math.h>
+#include <stdint.h>
+
+#define TWO_TO_31 0x80000000
+#define MUL 16777216
+#define N_ENTRIES 32
+#define DIV 24
+
+struct Polar {
+    int32_t rho;
+    int32_t theta;
+    bool valid;
+};
+
+int32_t rom[2*N_ENTRIES];
+
+Polar cordic(int32_t x0, int32_t y0) {
+    int64_t x = 0, y = 0;
+    int32_t z = 0;
+    
+    // Estensione su "34" bit (uso int64_t)
+    x = x0;
+    y = y0;
+    
+    // Riporto nel primo quadrante
+    x = (x < 0) ? -x : x;
+    
+    
+    for (int i=0; i<=25; i++) {
+        int64_t x_old = x, y_old = y;
+        int32_t z_old = z;
+        
+        // Calcolo il d
+        int d = (y < 0) ? 1 : -1;
+        
+        // Calcolo (inverter + mux + n_shift + adder)
+        x = x_old - ((d * y_old) >> i);
+        y = y_old + ((d * x_old) >> i);
+        
+        // Calcolo la entry della rom
+        int entry = (d > 0) ? i + N_ENTRIES : i;
+        
+        // Calcolo z usando la rom
+        z = z_old + rom[entry];
+    }
+    
+    // Preparo il risultato
+    Polar result = {0,0,false};
+    
+    // Calcolo rho
+    const int32_t A_n_inverted = 0x009B74ED;
+    int64_t temp_rho = ((x >> 2) * A_n_inverted) >> 22;
+    result.valid = (temp_rho >= TWO_TO_31) ? false : true;
+    result.rho = (int32_t) temp_rho;
+    
+    // Calcolo theta
+    const int32_t PI = 0x03243F6B;
+    if (x0 < 0) {
+        if (y0 >= 0) {
+            result.theta = z + PI;
+        } else {
+            result.theta = z - PI;
+        }
+    } else {
+        result.theta = -z;
+    }
+    
+    return result;
+}
+
+void gen_rom() {
+    // Calcolo i valori negativi di atan(2^-i)
+    for (int i = 0; i < N_ENTRIES; i++) {
+        double a = (-1)*atan(pow(0.5, (double) i));
+        rom[i] = (i < 25) ? (int32_t) (round(a*MUL)) : 0;
+    }
+    
+    // Calcolo i valori positivi di atan(2^-i)
+    for (int i = 0; i < N_ENTRIES; i++) {
+        double a = atan(pow(0.5, (double) i));
+        rom[i+N_ENTRIES] = (int32_t) (round(a*MUL));
+    }
+}
+
+int main() {
+    // Riempio la rom
+    gen_rom();
+    
+    // Test bisettrice [-127,127]
+    for (int k=-127; k<=127; k++) {
+        Polar p = cordic(k<<24,k<<24);
+        
+        printf("%08X %08X %08X %08X %d\n", k<<24, k<<24, p.theta, p.rho, p.valid);
+    }
+    
+    // Test bisettrice [90,91]
+    for (int k=0; k<=100; k++) {
+        double x = 90.0 + k/100.0;
+        double y = 90.0 + k/100.0;
+        
+        int32_t x_int = (int32_t) (round(x*MUL));
+        int32_t y_int = (int32_t) (round(y*MUL));
+        
+        Polar p = cordic(x_int,y_int);
+        
+        printf("%08X %08X %08X %08X %d\n", x_int, y_int, p.theta, p.rho, p.valid);
+    }
+    
+    // Test bisettrice [90.49,90.52]
+    for (int k=0; k<=30; k++) {
+        double x = 90.49 + k/1000.0;
+        double y = 90.49 + k/1000.0;
+        
+        int32_t x_int = (int32_t) (round(x*MUL));
+        int32_t y_int = (int32_t) (round(y*MUL));
+        
+        Polar p = cordic(x_int,y_int);
+        
+        printf("%08X %08X %08X %08X %d\n", x_int, y_int, p.theta, p.rho, p.valid);
+    }
+    
+    // Test angoli
+    const double r = 127;
+    for (int k=0; k<2*DIV; k++) {
+        double a = k * M_PI / DIV;
+        int32_t x_int = round(r*cos(a)*MUL);
+        int32_t y_int = round(r*sin(a)*MUL);
+        
+        Polar p = cordic(x_int,y_int);
+        
+        printf("%08X %08X %08X %08X %d \n", x_int, y_int, p.theta, p.rho, p.valid);
+    }
+    
+    return 0;
+}
+
+\end{lstlisting}
 
 
 
