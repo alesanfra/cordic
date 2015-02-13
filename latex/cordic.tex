@@ -208,9 +208,21 @@ Our circuit includes a specific submodule in order to implement the correct star
 \chapter{Testing}
 
 \section{Choice of testbench}
+We designed two different kind of tests to check the correctness of both outputs rho and theta respectively.
+The former ensure the modulus and validity bit while the former one validates the output angle.\\
+To perform those we used a VHDL testbench file which can take an external input file containing input and expected values and compare cordic results with the expected ones.\\
+The VHDL testbench and code for generating its input files can be found at the end of this document.
+
 \subsection{Testing modulus and validity bit}
+In this test we feed our circuit with coordinates of points which belongs to the function
+	\begin{equation}
+		y = x
+  	\end{equation}
+We start from point $P = \left(-127, -127\right)$ and move toward the first square with a step equal to 1 until we reach point $P=(127,127)$.\\
+Then we concentrate our tests near the point which produce a \em{rho} overflow. Such overflow occurs around $P=(90.5,90.5)$, so we repeat a similar test twice with a step of 0.01 and of 0.001.
 
 \subsection{Testing angle}
+After having tested the modulus output (\em{rho}), we check the output angle correctness. We start from a point whose polar coordinates are $\rho=127$ and $\theta=0$, then we move on a circumference with an angular step equal to $\frac{\pi}{24}$.
 
 \section{Generation of test data using C++}
 
