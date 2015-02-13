@@ -190,9 +190,10 @@ We can stop the algorithm at the 25th iteration since our data format does not s
 \section{soc, eoc, rst}
 We provide the user some bit to control the working status of our cordic circuit. In particular, we provide the following
 \begin{itemize}
-	\item{Soc (Start Of Conversion)}: This tells the circuit to take datas from the input bus (x_{0} and y_{0}) and start the conversion.
-	\item{Eoc (End Of Conversion)}: this is an output bit set by the cordic circuit when the conversion is over and the user can read the result on the output bus (rho and theta);
-	\item{Rst (ReSeT)}: this input bit is low triggered and it must be set to 0 when we want to ensure cordic circuit to be in a consistent state, so it must be set to 0 every time the user want to perform the first conversion.
+	\item Soc (Start Of Conversion): This tells the circuit to take datas from the input bus ($x_{0}$ and $y_0$) and start the conversion.
+	\item Eoc (End Of Conversion): this is an output bit set by the cordic circuit when the conversion is over and the user can read the result on the output bus (rho and theta);
+	\item Rst (ReSeT): this input bit is low triggered and it must be set to 0 when we want to ensure cordic circuit to be in a consistent state, so it must be set to 0 every time the user want to perform the first conversion.
+\end{itemize}
 
 In order to drive the circuit correctly, the user must use trigger the rst bit then, when the rst is set to 1 again, he can send input coordinates on the bus and set the soc bit.
 
