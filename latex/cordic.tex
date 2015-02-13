@@ -187,6 +187,18 @@ This component waits until \emph{soc} is at the low value and when the algorithm
 Since our circuit performs multiple iterations to reach the expected output values, we need a counter to stop the computation.
 We can stop the algorithm at the 25th iteration since our data format does not support precision provided with longer computation, in other words, the rotation angles after the 25th iteration are too small to be represented with Q8.24.
 
+\section{soc, eoc, rst}
+We provide the user some bit to control the working status of our cordic circuit. In particular, we provide the following
+\begin{itemize}
+	\item{Soc (Start Of Conversion)}: This tells the circuit to take datas from the input bus (x_{0} and y_{0}) and start the conversion.
+	\item{Eoc (End Of Conversion)}: this is an output bit set by the cordic circuit when the conversion is over and the user can read the result on the output bus (rho and theta);
+	\item{Rst (ReSeT)}: this input bit is low triggered and it must be set to 0 when we want to ensure cordic circuit to be in a consistent state, so it must be set to 0 every time the user want to perform the first conversion.
+
+In order to drive the circuit correctly, the user must use trigger the rst bit then, when the rst is set to 1 again, he can send input coordinates on the bus and set the soc bit.
+
+\subsection{Starter}
+Our circuit includes a specific submodule in order to implement the correct starting process. This Submodule is called \em{Starter}. The Started module check the value of the input bit soc and rst and provide a reset bit to all the cordic's registers. In particular it trigger a reset when the user sets rst to 0. Even when the user set the soc bit to 1, the reset goes to 0 for 10ns, so every register (including the iteration counter) is reset.
+
 
 \section{VHDL implementation}
 
