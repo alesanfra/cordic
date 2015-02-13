@@ -167,8 +167,26 @@ We can not go any further storing the arctan() values because we do not have eno
 
 We choose to fill the remaining locations with zeros. Doing this, we do not modify the value of the output angle when the conversion is complete.
 
+\section{Extender and is\textunderscore valid components}
+\begin{center}
+\includegraphics{img/isvalid.jpg}\\
+\end{center}
+The \emph{extender} is a component that simply extends the input of 2 bits, in particular this component extends the values of \emph{x0} and \emph{y0}. We compute these operations in order to ensure that the modulus can always be represented. In fact the maximum value that we can obtain for the modulus is when both \emph{x0} and \emph{y0} are identical and equal to the maximum and so the resultant modulus is:
+
+		\begin{equation}
+		x0 \cdot \sqrt{2} \cdot A_{n}
+		\end{equation}
+	\\	
+where the last two values are constant and smaller than 2 and so their product is strictly smaller than 4. In this way with 2 bits given by the extender we are sure to represent the modulus. 
+
+After the divider ( we remind that at the end of the $n^{th}$ iteration the value of $x_{n}$ represents the modulus times $A_{n}$ and so there is the necessity to divide it and moreover after the division we are sure that the modulus can be represented over n-1 bits), the modulus goes to the enter of the is \textunderscore valid block. 
+
+This component waits until \emph{soc} is at the low value and when the algorithm is at the last iteration and after that computes the \emph{valid} output, simply checking the equality between the two most significant bits. After this operation the block puts on the output \emph{rho} the reduced modulus and puts the output \emph{eoc} to the high value, to notify the user that the conversion is over and the modulus is available.
+
 \section{Counter}
 Since our circuit performs multiple iterations to reach the expected output values, we need a counter to stop the computation.
+We can stop the algorithm at the 25th iteration since our data format does not support precision provided with longer computation, in other words, the rotation angles after the 25th iteration are too small to be represented with Q8.24.
+
 
 \section{VHDL implementation}
 
