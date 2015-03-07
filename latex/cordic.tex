@@ -187,10 +187,12 @@ In order to drive the circuit correctly, the user must seto rst to 0 then, when 
 \subsection{Starter}
 Our circuit includes a specific submodule in order to implement the correct starting process. This Submodule is called \emph{Starter}. The Starter module check the value of the input bits soc and rst and provide a reset bit to all the cordic's registers. In particular it triggers a reset when the user sets rst to 0. Even when the user set the soc bit to 1, the reset goes to 0 for 10ns, so every register (including the iteration counter) is reset.
 
-
-\section{VHDL implementation}
-
-
+\pagebreak
+\begin{figure}
+\centering
+\includegraphics[scale=0.52]{img/blockCordic.jpg}
+\caption{General Overview\label{fig:block}}
+\end{figure}
 
 
 \chapter{Testing}
@@ -281,6 +283,51 @@ Then we concentrate our tests near the point which produce a \emph{rho} overflow
 
 \subsection{Testing angle}
 After having tested the modulus output (\emph{rho}), we check the output angle correctness. We start from a point whose polar coordinates are $\rho=127$ and $\theta=0$, then we move on a circumference with an angular step equal to $\frac{\pi}{24}$.
+
+\section{Waveform Examples}
+In the following figures you can see some examples of how signals evolve in time for a couple of different inputs.
+
+In particular in figure \ref{fig:bisector} we pass $[1,1]$ as input and after 25 iterations we obtain congruent result.
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth]{img/test-bisettrice.png}
+\caption{Waveform example of valid output\label{fig:bisector}}
+\end{figure}
+
+If instead we use $[120,126]$ as input, we obtain an invalid result, therefore valid flag has been set to 0.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=\textwidth]{img/test-valid.png}
+\caption{Waveform example of invalid output\label{fig:invalid}}
+\end{figure}
+
+
+
+
+
+
+\chapter{Synthesis using Xilinx ISE Tool}
+At the end we decide to synthesize our project using the Xilinx ISE Tool. We decide to set a balanced design goal which automatically sets the right process properties to achieve this optimization. After that we start our synthesis.
+After fixing some warnings not shown by the simulation tool, we get this result shown in the Device Utilization Summary. 
+
+\begin{center}
+\includegraphics[scale=0.9]{img/utilizationSummary.png}
+\end{center}
+
+
+And this is the timing report with the calculation of the maximum path delay which gives us the relative time constraint that we have to respect in order to obtain the maximum frequency to use to drive our network.
+
+\begin{center}
+\includegraphics[scale=0.9]{img/timingReport.png}
+\end{center}
+
+
+\appendix
+
+\chapter{Source code}
 
 \section{Generation of test data using C++}
 
@@ -423,22 +470,5 @@ int main() {
 }
 
 \end{lstlisting}
-
-
-
-
-\chapter{Synthesis using Xilinx ISE Tool}
-
-
-
-
-\chapter{Conclusions}
-
-
-
-
-\appendix
-
-\chapter{Source code}
 
 \end{document}
