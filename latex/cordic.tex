@@ -134,19 +134,6 @@ Our circuit deals with 32-bit inputs and outputs in Q8.24 fixed point notation. 
 
 This notation let us represent value in the interval $ \left[ -128; 127.9999999 \right]$ and it gives us enough precision to represent $2^{-24}$ radians.
 
-\section{Extender and is\textunderscore valid components}
-\begin{center}
-\includegraphics{img/isvalid.jpg}\\
-\end{center}
-The \emph{extender} is a component that simply extends the input of 2 bits, in particular this component extends the values of \emph{x0} and \emph{y0}. We compute these operations in order to ensure that the modulus can always be represented. In fact the maximum value that we can obtain from the modulus is when both \emph{x0} and \emph{y0} are equals and maximums and so the resultant modulus is:
-
-\begin{equation}
-x_{0} \cdot \sqrt{2} \cdot A_{n}
-\end{equation}
-
-where the last two values are constant and smaller than 2 and so...
-
-
 \section{ROM and addresses generator}
 In order to compute the rotation angle at each iteration, we need the value of $\alpha_{i}$ for each possible iteration $i$.\\
 As we said in \ref{cordic_alghorithm}, we use a 64x32bit ROM to store the arctan() values.
@@ -195,10 +182,10 @@ We provide the user some bit to control the working status of our cordic circuit
 	\item Rst (ReSeT): this input bit is low triggered and it must be set to 0 when we want to ensure cordic circuit to be in a consistent state, so it must be set to 0 every time the user want to perform the first conversion.
 \end{itemize}
 
-In order to drive the circuit correctly, the user must use trigger the rst bit then, when the rst is set to 1 again, he can send input coordinates on the bus and set the soc bit.
+In order to drive the circuit correctly, the user must seto rst to 0 then, when the rst is set to 1 again, he can set input coordinates on the bus and notify the circuit via soc bit that data on $x_0 y_0$ are valid and the conversion can start.
 
 \subsection{Starter}
-Our circuit includes a specific submodule in order to implement the correct starting process. This Submodule is called \em{Starter}. The Started module check the value of the input bit soc and rst and provide a reset bit to all the cordic's registers. In particular it trigger a reset when the user sets rst to 0. Even when the user set the soc bit to 1, the reset goes to 0 for 10ns, so every register (including the iteration counter) is reset.
+Our circuit includes a specific submodule in order to implement the correct starting process. This Submodule is called \emph{Starter}. The Starter module check the value of the input bits soc and rst and provide a reset bit to all the cordic's registers. In particular it triggers a reset when the user sets rst to 0. Even when the user set the soc bit to 1, the reset goes to 0 for 10ns, so every register (including the iteration counter) is reset.
 
 
 \section{VHDL implementation}
@@ -214,16 +201,86 @@ The former ensure the modulus and validity bit while the former one validates th
 To perform those we used a VHDL testbench file which can take an external input file containing input and expected values and compare cordic results with the expected ones.\\
 The VHDL testbench and code for generating its input files can be found at the end of this document.
 
+\begin{lstlisting}[caption={	A snippet from the testbench network}]
+begin
+	
+		file_open(file_TEST, "test_cordic.txt", read_mode);
+		rst <= '1';
+		
+		while not endfile(file_TEST) loop
+			readline(file_TEST, v_ILINE);
+			hread(v_ILINE, v_x0);	--reading first input
+			hread(v_ILINE, v_y0);	--read second input
+			hread(v_ILINE, v_theta);--reading expected theta
+			hread(v_ILINE, v_rho);	--reading expected rho
+			read(v_ILINE, v_valid);	--reading valid bit
+			
+			--wait for 10 ns;
+			
+			--wait for 60 ns;
+			x0 <= v_x0;
+			y0 <= v_y0;
+			
+			wait for 10 ns;
+			soc <= '1' after 0 ns, '0' after 10 ns;
+			wait for 10 ns;
+			 
+			while eoc = '0' loop
+				wait for 10 ns;
+			end loop;
+			
+			wait for 10 ns;
+			
+			write(v_OLINE, "rho ");
+			hwrite(v_OLINE, rho);
+			write(v_OLINE, " ");
+			hwrite(v_OLINE, v_rho);
+			write(v_OLINE, "  theta");
+			write(v_OLINE, " ");
+			hwrite(v_OLINE, zn);	   
+			write(v_OLINE, " ");
+			hwrite(v_OLINE, v_theta);
+			write(v_OLINE, "  valid bit ");
+			write(v_OLINE, valid);
+			writeline(OUTPUT, v_OLINE);
+			
+			h_rho := rho(N-1 downto 16);
+			h_theta := zn(N-1 downto 16);
+			
+			assert valid = v_valid
+				report "Error on valid bit"
+				severity ERROR;	  
+				
+			if v_valid = '1' then 
+				assert h_rho = v_rho(N-1 downto 16)
+					report "Error on rho"
+					severity ERROR;
+			end if;
+				
+			assert h_theta  = v_theta(N-1 downto 16)
+				report "Error on theta"
+				severity ERROR;	  
+				
+		end loop;
+		
+		file_close(file_TEST);
+		write(v_OLINE,"End of test");	
+		writeline(OUTPUT,v_OLINE);
+		
+		wait;
+	end process;
+\end{lstlisting}
+
 \subsection{Testing modulus and validity bit}
 In this test we feed our circuit with coordinates of points which belongs to the function
 	\begin{equation}
 		y = x
   	\end{equation}
-We start from point $P = \left(-127, -127\right)$ and move toward the first square with a step equal to 1 until we reach point $P=(127,127)$.\\
-Then we concentrate our tests near the point which produce a \em{rho} overflow. Such overflow occurs around $P=(90.5,90.5)$, so we repeat a similar test twice with a step of 0.01 and of 0.001.
+We start from point $P = \left(-127, -127\right)$ and move toward the first quadrant with a step equal to 1 until we reach point $P=(127,127)$.\\
+Then we concentrate our tests near the point which produce a \emph{rho} overflow. Such overflow occurs around $P=(90.5,90.5)$, so we concentrate our test around that point with a step equal to 0.01 and 0.001.
 
 \subsection{Testing angle}
-After having tested the modulus output (\em{rho}), we check the output angle correctness. We start from a point whose polar coordinates are $\rho=127$ and $\theta=0$, then we move on a circumference with an angular step equal to $\frac{\pi}{24}$.
+After having tested the modulus output (\emph{rho}), we check the output angle correctness. We start from a point whose polar coordinates are $\rho=127$ and $\theta=0$, then we move on a circumference with an angular step equal to $\frac{\pi}{24}$.
 
 \section{Generation of test data using C++}
 
@@ -249,11 +306,11 @@ Polar cordic(int32_t x0, int32_t y0) {
     int64_t x = 0, y = 0;
     int32_t z = 0;
     
-    // Estensione su "34" bit (uso int64_t)
+    // Extention to "34" bits (using int64_t)
     x = x0;
     y = y0;
     
-    // Riporto nel primo quadrante
+    // Moving to first or fourth quadrant
     x = (x < 0) ? -x : x;
     
     
@@ -261,30 +318,30 @@ Polar cordic(int32_t x0, int32_t y0) {
         int64_t x_old = x, y_old = y;
         int32_t z_old = z;
         
-        // Calcolo il d
+        // Computing d
         int d = (y < 0) ? 1 : -1;
         
-        // Calcolo (inverter + mux + n_shift + adder)
+        // Computing (inverter + mux + n_shift + adder)
         x = x_old - ((d * y_old) >> i);
         y = y_old + ((d * x_old) >> i);
         
-        // Calcolo la entry della rom
+        // reading  ROM entry
         int entry = (d > 0) ? i + N_ENTRIES : i;
         
-        // Calcolo z usando la rom
+        // Computing z using ROM's value
         z = z_old + rom[entry];
     }
     
-    // Preparo il risultato
+    // Preparing result
     Polar result = {0,0,false};
     
-    // Calcolo rho
+    // Computing rho
     const int32_t A_n_inverted = 0x009B74ED;
     int64_t temp_rho = ((x >> 2) * A_n_inverted) >> 22;
     result.valid = (temp_rho >= TWO_TO_31) ? false : true;
     result.rho = (int32_t) temp_rho;
     
-    // Calcolo theta
+    // Computing theta
     const int32_t PI = 0x03243F6B;
     if (x0 < 0) {
         if (y0 >= 0) {
@@ -300,13 +357,13 @@ Polar cordic(int32_t x0, int32_t y0) {
 }
 
 void gen_rom() {
-    // Calcolo i valori negativi di atan(2^-i)
+    // Computing negative values for atan(2^-i)
     for (int i = 0; i < N_ENTRIES; i++) {
         double a = (-1)*atan(pow(0.5, (double) i));
         rom[i] = (i < 25) ? (int32_t) (round(a*MUL)) : 0;
     }
     
-    // Calcolo i valori positivi di atan(2^-i)
+    // Computing positive values for atan(2^-i)
     for (int i = 0; i < N_ENTRIES; i++) {
         double a = atan(pow(0.5, (double) i));
         rom[i+N_ENTRIES] = (int32_t) (round(a*MUL));
@@ -314,17 +371,17 @@ void gen_rom() {
 }
 
 int main() {
-    // Riempio la rom
+    // Filling ROM entries
     gen_rom();
     
-    // Test bisettrice [-127,127]
+    // Bisector test [-127,127]
     for (int k=-127; k<=127; k++) {
         Polar p = cordic(k<<24,k<<24);
         
         printf("%08X %08X %08X %08X %d\n", k<<24, k<<24, p.theta, p.rho, p.valid);
     }
     
-    // Test bisettrice [90,91]
+    // Bisector test [90,91]
     for (int k=0; k<=100; k++) {
         double x = 90.0 + k/100.0;
         double y = 90.0 + k/100.0;
@@ -337,7 +394,7 @@ int main() {
         printf("%08X %08X %08X %08X %d\n", x_int, y_int, p.theta, p.rho, p.valid);
     }
     
-    // Test bisettrice [90.49,90.52]
+    // Bisector test [90.49,90.52]
     for (int k=0; k<=30; k++) {
         double x = 90.49 + k/1000.0;
         double y = 90.49 + k/1000.0;
@@ -350,7 +407,7 @@ int main() {
         printf("%08X %08X %08X %08X %d\n", x_int, y_int, p.theta, p.rho, p.valid);
     }
     
-    // Test angoli
+    // Angles test
     const double r = 127;
     for (int k=0; k<2*DIV; k++) {
         double a = k * M_PI / DIV;
