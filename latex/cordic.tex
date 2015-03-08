@@ -22,7 +22,7 @@
 	basicstyle=\ttfamily\small,
 	%keywordstyle=\color{dblue}\bfseries,
 	%commentstyle=\color{cyan}\itshape,
-	frame=lrtb,
+	frame=tb,
 	columns=fullflexible,
 	showstringspaces=false,
 	breaklines=true
@@ -68,6 +68,7 @@
 
 \tableofcontents
 
+
 \chapter{Introduction}
 
 \section{The CORDIC algorithm}
@@ -104,7 +105,6 @@ The rotation performed at each stage $i$ is equal to $\alpha_{i}$ and the total 
 \begin{equation}
 z_{i+1} = z_{i} + d_{i} \arctan \left(\dfrac{1}{2^i}\right)
 \end{equation}
-
 
 The results of the $\arctan()$ function can be stored in a ROM since this algorithm has to apply this function to a limited set of value. Such set depends on the number of iteration we are interested in.
 
@@ -156,6 +156,7 @@ We can not go any further storing the arctan() values because we do not have eno
 \begin{center}
 \includegraphics{img/isvalid.jpg}
 \end{center}
+
 As we discussed before, our data representation puts some limits on the range of signals we can manage. In particular there are some possible input values whose polar transformation can not be represented with Q8.24 notation.
 
 In order to be sure whether an output is congruent with the input or not, we implement a valid mechanism.
@@ -175,7 +176,7 @@ The \emph{Is\textunderscore valid} is also in charge of managing the correct seq
 Since our circuit performs multiple iterations to reach the expected output values, we need a counter to stop the computation.
 We can stop the algorithm at the 25th iteration since our data format does not support precision provided with longer computation, in other words, the rotation angles after the 25th iteration are too small to be represented with Q8.24.
 
-\section{soc, eoc, rst}
+\section{Soc, Eoc, Rst}
 We provide the user some bits to control the working status of our cordic circuit. In particular, we provide the following:
 \begin{itemize}
 	\item Soc (Start Of Conversion): This tells the circuit to take datas from the input bus ($x_{0}$ and $y_0$) and start the conversion.
@@ -185,7 +186,7 @@ We provide the user some bits to control the working status of our cordic circui
 
 In order to drive the circuit correctly, the user must firstly set \emph{rst} to 0. Then, when the \emph{rst} is set to 1 again, \emph{soc} must assume 1 to notify the circuit that data on $x_0$ and $y_0$ are valid and the conversion can start.
 
-\subsection{Starter}
+\section{Starter}
 Our circuit includes a specific submodule, called \emph{Starter}, in order to implement the correct starting process. The \emph{Starter} module checks the value of \emph{soc} and \emph{rst}, and it provides a reset signal to all internal registers. In particular it triggers a reset when:
 
 \begin{itemize}
@@ -204,7 +205,7 @@ Our circuit includes a specific submodule, called \emph{Starter}, in order to im
 
 \chapter{Testing}
 
-\section{Choice of testbench}
+\section{Design of testbench}
 We designed two different kind of tests to check the correctness of both outputs rho and theta respectively.
 The former ensure the modulus and validity bit while the latter validates the output angle.\\
 To perform those we used a VHDL testbench file which can take an external input file containing input and expected values and compare cordic results with the expected ones.\\
@@ -212,72 +213,68 @@ The VHDL testbench and code for generating its input files can be found at secti
 
 \begin{lstlisting}[caption={A snippet from the testbench network}]
 begin
+	file_open(file_TEST, "test_cordic.txt", read_mode);
+	rst <= '1';
 	
-		file_open(file_TEST, "test_cordic.txt", read_mode);
-		rst <= '1';
+	while not endfile(file_TEST) loop
+		readline(file_TEST, v_ILINE);
+		hread(v_ILINE, v_x0);	--reading first input
+		hread(v_ILINE, v_y0);	--read second input
+		hread(v_ILINE, v_theta);--reading expected theta
+		hread(v_ILINE, v_rho);	--reading expected rho
+		read(v_ILINE, v_valid);	--reading valid bit
 		
-		while not endfile(file_TEST) loop
-			readline(file_TEST, v_ILINE);
-			hread(v_ILINE, v_x0);	--reading first input
-			hread(v_ILINE, v_y0);	--read second input
-			hread(v_ILINE, v_theta);--reading expected theta
-			hread(v_ILINE, v_rho);	--reading expected rho
-			read(v_ILINE, v_valid);	--reading valid bit
-			
-			--wait for 10 ns;
-			
-			--wait for 60 ns;
-			x0 <= v_x0;
-			y0 <= v_y0;
-			
+		x0 <= v_x0;
+		y0 <= v_y0;
+		
+		wait for 10 ns;
+		soc <= '1' after 0 ns, '0' after 10 ns;
+		wait for 10 ns;
+		 
+		while eoc = '0' loop
 			wait for 10 ns;
-			soc <= '1' after 0 ns, '0' after 10 ns;
-			wait for 10 ns;
-			 
-			while eoc = '0' loop
-				wait for 10 ns;
-			end loop;
-			
-			wait for 10 ns;
-			
-			write(v_OLINE, "rho ");
-			hwrite(v_OLINE, rho);
-			write(v_OLINE, " ");
-			hwrite(v_OLINE, v_rho);
-			write(v_OLINE, "  theta");
-			write(v_OLINE, " ");
-			hwrite(v_OLINE, zn);	   
-			write(v_OLINE, " ");
-			hwrite(v_OLINE, v_theta);
-			write(v_OLINE, "  valid bit ");
-			write(v_OLINE, valid);
-			writeline(OUTPUT, v_OLINE);
-			
-			h_rho := rho(N-1 downto 16);
-			h_theta := zn(N-1 downto 16);
-			
-			assert valid = v_valid
-				report "Error on valid bit"
-				severity ERROR;	  
-				
-			if v_valid = '1' then 
-				assert h_rho = v_rho(N-1 downto 16)
-					report "Error on rho"
-					severity ERROR;
-			end if;
-				
-			assert h_theta  = v_theta(N-1 downto 16)
-				report "Error on theta"
-				severity ERROR;	  
-				
 		end loop;
 		
-		file_close(file_TEST);
-		write(v_OLINE,"End of test");	
-		writeline(OUTPUT,v_OLINE);
+		wait for 10 ns;
 		
-		wait;
-	end process;
+		write(v_OLINE, "rho ");
+		hwrite(v_OLINE, rho);
+		write(v_OLINE, " ");
+		hwrite(v_OLINE, v_rho);
+		write(v_OLINE, "  theta");
+		write(v_OLINE, " ");
+		hwrite(v_OLINE, zn);	   
+		write(v_OLINE, " ");
+		hwrite(v_OLINE, v_theta);
+		write(v_OLINE, "  valid bit ");
+		write(v_OLINE, valid);
+		writeline(OUTPUT, v_OLINE);
+		
+		h_rho := rho(N-1 downto 16);
+		h_theta := zn(N-1 downto 16);
+		
+		assert valid = v_valid
+			report "Error on valid bit"
+			severity ERROR;	  
+			
+		if v_valid = '1' then 
+			assert h_rho = v_rho(N-1 downto 16)
+				report "Error on rho"
+				severity ERROR;
+		end if;
+			
+		assert h_theta  = v_theta(N-1 downto 16)
+			report "Error on theta"
+			severity ERROR;	  
+			
+	end loop;
+	
+	file_close(file_TEST);
+	write(v_OLINE,"End of test");	
+	writeline(OUTPUT,v_OLINE);
+	
+	wait;
+end process;
 \end{lstlisting}
 
 \subsection{Testing modulus and validity bit}
@@ -285,7 +282,8 @@ In this test we feed our circuit with coordinates of points which belongs to the
 	\begin{equation}
 		y = x
   	\end{equation}
-We start from point $P = \left(-127, -127\right)$ and move toward the first quadrant with a step equal to 1 until we reach point $P=(127,127)$.\\
+We start from point $P = \left(-127, -127\right)$ and move toward the first quadrant with a step equal to 1 until we reach point $P=(127,127)$.
+
 Then we concentrate our tests near the point which produce a \emph{rho} overflow. Such overflow occurs around $P=(90.5,90.5)$, so we concentrate our test around that point with a step equal to 0.01 and 0.001.
 
 \subsection{Testing angle}
@@ -310,10 +308,6 @@ If instead we use $[120,126]$ as input, we obtain an invalid result, therefore v
 \includegraphics[width=\textwidth]{img/test-valid.png}
 \caption{Waveform example of invalid output\label{fig:invalid}}
 \end{figure}
-
-
-
-
 
 
 \chapter{Synthesis using Xilinx ISE Tool}
@@ -365,13 +359,11 @@ Polar cordic(int32_t x0, int32_t y0) {
     int64_t x = 0, y = 0;
     int32_t z = 0;
     
-    // Extention to "34" bits (using int64_t)
-    x = x0;
-    y = y0;
+    // Extension to "34" bits (using int64_t)
+    x = x0; y = y0;
     
     // Moving to first or fourth quadrant
     x = (x < 0) ? -x : x;
-    
     
     for (int i=0; i<=25; i++) {
         int64_t x_old = x, y_old = y;
@@ -391,8 +383,7 @@ Polar cordic(int32_t x0, int32_t y0) {
         z = z_old + rom[entry];
     }
     
-    // Preparing result
-    Polar result = {0,0,false};
+    Polar result = {0,0,false}; // Preparing result
     
     // Computing rho
     const int32_t A_n_inverted = 0x009B74ED;
@@ -430,13 +421,11 @@ void gen_rom() {
 }
 
 int main() {
-    // Filling ROM entries
-    gen_rom();
+    gen_rom(); // Filling ROM entries
     
     // Bisector test [-127,127]
     for (int k=-127; k<=127; k++) {
         Polar p = cordic(k<<24,k<<24);
-        
         printf("%08X %08X %08X %08X %d\n", k<<24, k<<24, p.theta, p.rho, p.valid);
     }
     
@@ -444,25 +433,19 @@ int main() {
     for (int k=0; k<=100; k++) {
         double x = 90.0 + k/100.0;
         double y = 90.0 + k/100.0;
-        
         int32_t x_int = (int32_t) (round(x*MUL));
         int32_t y_int = (int32_t) (round(y*MUL));
-        
-        Polar p = cordic(x_int,y_int);
-        
+        Polar p = cordic(x_int,y_int);     
         printf("%08X %08X %08X %08X %d\n", x_int, y_int, p.theta, p.rho, p.valid);
     }
     
     // Bisector test [90.49,90.52]
     for (int k=0; k<=30; k++) {
         double x = 90.49 + k/1000.0;
-        double y = 90.49 + k/1000.0;
-        
+        double y = 90.49 + k/1000.0; 
         int32_t x_int = (int32_t) (round(x*MUL));
-        int32_t y_int = (int32_t) (round(y*MUL));
-        
-        Polar p = cordic(x_int,y_int);
-        
+        int32_t y_int = (int32_t) (round(y*MUL));       
+        Polar p = cordic(x_int,y_int);    
         printf("%08X %08X %08X %08X %d\n", x_int, y_int, p.theta, p.rho, p.valid);
     }
     
@@ -472,9 +455,7 @@ int main() {
         double a = k * M_PI / DIV;
         int32_t x_int = round(r*cos(a)*MUL);
         int32_t y_int = round(r*sin(a)*MUL);
-        
         Polar p = cordic(x_int,y_int);
-        
         printf("%08X %08X %08X %08X %d \n", x_int, y_int, p.theta, p.rho, p.valid);
     }
     
