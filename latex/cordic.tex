@@ -79,14 +79,15 @@ CORDIC is an acronym for \emph{COordinate Rotation DIgital Computer} and it was 
 
 CORDIC has two mode of operation: \emph{rotation} and \emph{vector}. The former mode takes the coordinates of an input vector plus an angle of rotation and returns the new coordinates after the rotation has been applied.
 
-The vector mode can convert an input vector from cartesian to polar coordinates and its result depends on multiple iterations of the CORDIC rotation mode. Basically, vector mode rotates the input vector until its \emph{y} coordinate became 0, so the modulus of the given vector is exactly equal to the value of the \emph{x} coordinate of the rotated vector and its angle is equal to the opposite of the total rotation angle.\newline
-The rotation angle performed at $i$-th iteration $\alpha$ is
+The vector mode can convert an input vector from cartesian to polar coordinates and its result depends on multiple iterations of the CORDIC rotation mode. Basically, vector mode rotates the input vector until its \emph{y} coordinate become 0, so the modulus of the given vector is exactly equal to the value of the \emph{x} coordinate of the rotated vector and its angle is equal to the opposite of the total rotation angle.
+
+The rotation angle performed at $i$-th iteration $\alpha$ is:
 
 \begin{equation}
 \alpha_{i} = \arctan \left(\dfrac{1}{2^i}\right)
 \end{equation}
 
-The reason for choosing such angles is that the rotated coordinates $x_{i+1}$ $y_{i+1}$  after $i$ rotation became
+The reason for choosing such angles is that the rotated coordinates $x_{i+1}$ $y_{i+1}$  after $i$ rotation become:
 
 \begin{equation}
 x_{i+1} = x_{i} - d_{i} y_{i}  2^{-i}
@@ -117,6 +118,7 @@ The aim of this work is to produce a component which implements the CORDIC vecto
 \begin{center}
 \includegraphics[scale=.50]{img/cd.jpg}\\
 \end{center}
+
 Our network has five inputs and four outputs. \emph{x0} and \emph{y0} are the Cartesian coordinates which have to be transformed in polar coordinates. 
 
 After entering the values of these inputs the user has to put \emph{soc} to the high value (\emph{1}) to let the network starting the conversion. To obtain the result the user has to put again the input \emph{soc} to the low value (\emph{0}); when the output \emph{eoc} goes to the high value the result can be read as modulus and angle respectively in the outputs \emph{rho} and \emph{theta}, the values obtained are given in fixed point with a notation Q8.24 (8 bits for the integer part, 24 bits for the decimal part). 
@@ -138,13 +140,13 @@ In order to compute the rotation angle at each iteration, we need the value of $
 
 As we said in section \ref{sec:cordic_alghorithm}, we use a 64x32bit ROM to store the arctan() values.
 
-The ROM is filled such that the first 25 location contain angles $\alpha$ like
+The ROM is filled such that the first 25 location contain angles $\alpha$ like:
 
 \begin{equation}
 \alpha_{i} = \arctan \left( - \dfrac{1}{2^{i}} \right) \mbox{ with} \; i \in \left[0; 24 \right]
 \end{equation}
 
-The location from address 32 to 56 are filled with angles $\alpha$ like
+The location from address 32 to 56 are filled with angles $\alpha$ like:
 
 \begin{equation}
 \alpha_{i} = \arctan \left(\dfrac{1}{2^{i}} \right) \mbox{ with} \; i \in \left[0; 24 \right]
@@ -161,11 +163,13 @@ As we discussed before, our data representation puts some limits on the range of
 
 In order to be sure whether an output is congruent with the input or not, we implement a valid mechanism.
 Such mechanism takes advantages of 2 main components: \emph{Extender} and \emph{Is\textunderscore valid}.
-The cordic algorithm returns the modulus multiplied by a factor of $A_{n}\sqrt{2}$ where 
+The cordic algorithm returns the modulus multiplied by a factor of $A_{n}\sqrt{2}$ where:
+ 
 \begin{equation}
 A_n = \prod_{i = 0}^n{\sqrt{1+2^{-2i}}}
 \end{equation}
 so, $A_n$ is constant with the number of iteration we perform. The only thing we have to do to provide the modulus is to divide it by $A_n$.
+
 When an input is provided to our network, we extend it with 2 bits more. Such extension takes into account the multiplication factor $A_n$ and we have no representation problem.
 
 Once we have computed the result, we use the \emph{Is\textunderscore valid} to reset the validity bit if the output is not representable.
@@ -174,10 +178,12 @@ The \emph{Is\textunderscore valid} is also in charge of managing the correct seq
 
 \section{Counter}
 Since our circuit performs multiple iterations to reach the expected output values, we need a counter to stop the computation.
+
 We can stop the algorithm at the 25th iteration since our data format does not support precision provided with longer computation, in other words, the rotation angles after the 25th iteration are too small to be represented with Q8.24.
 
 \section{Soc, Eoc, Rst}
 We provide the user some bits to control the working status of our cordic circuit. In particular, we provide the following:
+
 \begin{itemize}
 	\item Soc (Start Of Conversion): This tells the circuit to take datas from the input bus ($x_{0}$ and $y_0$) and start the conversion.
 	\item Eoc (End Of Conversion): this is an output bit set by the cordic circuit when the conversion is over and the user can read the result on the output bus (rho and theta);
@@ -207,20 +213,26 @@ Our circuit includes a specific submodule, called \emph{Starter}, in order to im
 
 \section{Design of testbench}
 We designed two different kind of tests to check the correctness of both outputs rho and theta respectively.
-The former ensure the modulus and validity bit while the latter validates the output angle.\\
-To perform those we used a VHDL testbench file which can take an external input file containing input and expected values and compare cordic results with the expected ones.\\
+The former ensure the modulus and validity bit while the latter validates the output angle.
+
+To perform those we used a VHDL testbench file which can take an external input file containing input and expected values and compare cordic results with the expected ones.
+
 The VHDL testbench and code for generating its input files can be found at section \ref{sec:test_generator}
 
-\begin{lstlisting}[caption={A snippet from the testbench network}]
+\begin{lstlisting}[caption={A snippet from the testbench}]
 begin
-	file_open(file_TEST, "test_cordic.txt", read_mode);
+	file_open(file_TEST, "test_cordic.txt", read_mode);	  
+
+	rst <= '0';
+	wait for 20 ns;
 	rst <= '1';
+	wait for 20 ns;
 	
-	while not endfile(file_TEST) loop
+	while not endfile(file_TEST) loop 
 		readline(file_TEST, v_ILINE);
 		hread(v_ILINE, v_x0);	--reading first input
 		hread(v_ILINE, v_y0);	--read second input
-		hread(v_ILINE, v_theta);--reading expected theta
+		hread(v_ILINE, v_theta);	--reading expected theta
 		hread(v_ILINE, v_rho);	--reading expected rho
 		read(v_ILINE, v_valid);	--reading valid bit
 		
@@ -229,13 +241,11 @@ begin
 		
 		wait for 10 ns;
 		soc <= '1' after 0 ns, '0' after 10 ns;
-		wait for 10 ns;
+		wait for 20 ns;
 		 
 		while eoc = '0' loop
-			wait for 10 ns;
+			wait for 50 ns;
 		end loop;
-		
-		wait for 10 ns;
 		
 		write(v_OLINE, "rho ");
 		hwrite(v_OLINE, rho);
@@ -243,7 +253,7 @@ begin
 		hwrite(v_OLINE, v_rho);
 		write(v_OLINE, "  theta");
 		write(v_OLINE, " ");
-		hwrite(v_OLINE, zn);	   
+		hwrite(v_OLINE, theta);	   
 		write(v_OLINE, " ");
 		hwrite(v_OLINE, v_theta);
 		write(v_OLINE, "  valid bit ");
@@ -251,7 +261,7 @@ begin
 		writeline(OUTPUT, v_OLINE);
 		
 		h_rho := rho(N-1 downto 16);
-		h_theta := zn(N-1 downto 16);
+		h_theta := theta(N-1 downto 16);
 		
 		assert valid = v_valid
 			report "Error on valid bit"
@@ -261,27 +271,27 @@ begin
 			assert h_rho = v_rho(N-1 downto 16)
 				report "Error on rho"
 				severity ERROR;
+			
+			assert h_theta  = v_theta(N-1 downto 16)
+				report "Error on theta"
+				severity ERROR;
 		end if;
-			
-		assert h_theta  = v_theta(N-1 downto 16)
-			report "Error on theta"
-			severity ERROR;	  
-			
 	end loop;
 	
 	file_close(file_TEST);
-	write(v_OLINE,"End of test");	
+	write(v_OLINE,"Fine del test");	
 	writeline(OUTPUT,v_OLINE);
-	
 	wait;
 end process;
 \end{lstlisting}
 
 \subsection{Testing modulus and validity bit}
-In this test we feed our circuit with coordinates of points which belongs to the function
-	\begin{equation}
-		y = x
-  	\end{equation}
+In this test we feed our circuit with coordinates of points which belongs to the function:
+
+\begin{equation}
+	y = x
+\end{equation}
+
 We start from point $P = \left(-127, -127\right)$ and move toward the first quadrant with a step equal to 1 until we reach point $P=(127,127)$.
 
 Then we concentrate our tests near the point which produce a \emph{rho} overflow. Such overflow occurs around $P=(90.5,90.5)$, so we concentrate our test around that point with a step equal to 0.01 and 0.001.
@@ -293,7 +303,6 @@ After having tested the modulus output (\emph{rho}), we check the output angle c
 In the following figures you can see some examples of how signals evolve in time for a couple of different inputs.
 
 In particular in figure \ref{fig:bisector} we pass $[1,1]$ as input and after 25 iterations we obtain congruent result.
-
 
 \begin{figure}[!h]
 \centering
