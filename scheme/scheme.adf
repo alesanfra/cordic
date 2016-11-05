@@ -1,0 +1,111 @@
+[Project]
+Current Flow=Generic
+VCS=0
+version=3
+Current Config=compile
+
+[Configurations]
+compile=scheme
+
+[Library]
+scheme=.\scheme\scheme.lib
+
+[Settings]
+AccessRead=0
+AccessReadWrite=0
+AccessACCB=0
+AccessACCR=0
+AccessReadWriteSLP=0
+AccessReadTopLevel=1
+DisableC=1
+ENABLE_ADV_DATAFLOW=0
+FLOW_TYPE=HDL
+LANGUAGE=VHDL
+REFRESH_FLOW=1
+FLOWTOOLS=NONE
+FAMILY=
+IMPL_TOOL=
+SYNTH_TOOL=
+fileopenfolder=C:\Users\Francesco\Desktop
+
+[LocalVerilogSets]
+EnableSLP=1
+EnableDebug=0
+
+[LocalVhdlSets]
+CompileWithDebug=0
+
+[$LibMap$]
+scheme=.
+Active_lib=
+
+[Folders]
+Name3=Makefiles
+Directory3=\\vmware-host\Shared Folders\Scrivania\Progetto\scheme2\scheme\
+Extension3=mak
+Name4=Memory
+Directory4=\\vmware-host\Shared Folders\Scrivania\Progetto\scheme2\scheme\
+Extension4=mem;mif;hex
+Name5=Dll Libraries
+Directory5=\\vmware-host\Shared Folders\Scrivania\Progetto\scheme2\scheme\
+Extension5=dll
+Name6=PDF
+Directory6=\\vmware-host\Shared Folders\Scrivania\Progetto\scheme2\scheme\
+Extension6=pdf
+Name7=HTML
+Directory7=\\vmware-host\Shared Folders\Scrivania\Progetto\scheme2\scheme\
+Extension7=
+
+[SpecTracer]
+WindowVisible=0
+
+[HierarchyViewer]
+HierarchyInformation=cordic_tb|behav|0  
+ShowHide=ShowTopLevel
+Selected=
+
+[Files]
+/is_valid.vhd=-1
+/divider.vhd=-1
+/fixed_shift.vhd=-1
+/sign.vhd=-1
+/starter.vhd=-1
+/half_adder.vhd=-1
+/n_mux.vhd=-1
+/n_register.vhd=-1
+/createAddr.vhd=-1
+/fix_angle.vhd=-1
+/cordic_tb.vhd=-1
+/extender.vhd=-1
+/abs.vhd=-1
+/counter_new.vhd=-1
+/adder.vhd=-1
+/Rom64x32.vhd=-1
+/inverter.vhd=-1
+/n_shift.vhd=-1
+/blockCordic.bde=-1
+
+[Files.Data]
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\is_valid.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\divider.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\fixed_shift.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\sign.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\starter.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\half_adder.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\n_mux.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\n_register.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\createAddr.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\fix_angle.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\cordic_tb.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\extender.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\abs.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\counter_new.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\adder.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\Rom64x32.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\inverter.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\n_shift.vhd=VHDL Source Code
+\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\blockCordic.bde=Block Diagram
+
+[file_out:/blockCordic.bde]
+/\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\compile\blockCordic.vhd=-1
+

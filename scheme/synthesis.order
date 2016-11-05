@@ -1,0 +1,21 @@
+i<>.\src\adder.vhd
+i<>.\src\dff.vhd
+i<>.\src\half_adder.vhd
+i<>.\src\inverter.vhd
+i<>.\src\counter.vhd
+i<>.\src\sign.vhd
+i<>.\src\fixed_shift.vhd
+i<>.\src\n_shift.vhd
+i<>.\src\or6.vhd
+i<>.\src\n_register.vhd
+i<>.\src\n_mux.vhd
+i<>.\src\Rom64x32.vhd
+i<>.\src\createAddr.vhd
+i<>\\vmware-host\Shared Folders\Scrivania\scheme2\scheme\src\counter_new.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\counter_new.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\abs.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\fix_angle.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\starter.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\divider.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\is_valid.vhd
+i<>\\vmware-host\shared folders\scrivania\scheme2\scheme\src\extender.vhd

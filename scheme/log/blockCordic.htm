@@ -1,0 +1,121 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+
+<!----------------------------------------------------------------------------->
+<!--                          BEGIN HTML HEAD                                -->
+<!--                                                                         -->
+
+<HEAD>
+<TITLE>DRC Report File - blockCordic.bde</TITLE>
+<STYLE>
+.Err	{color:'#FF0000';cursor:hand;text-decoration:underline;}
+.Warn	{color:'#0000FF';cursor:hand;text-decoration:underline;}
+.Info	{color:'#000000';cursor:hand;text-decoration:underline;}
+.Sccss  {color:'#009600';cursor:hand;text-decoration:underline;}
+.ErrH	{color:'#FF0000';cursor:hand;text-decoration:underline;}
+.WarnH	{color:'#0000FF';cursor:hand;text-decoration:underline;}
+.InfoH	{color:'#000000';cursor:hand;text-decoration:underline;}
+.Err1	{color:'#FF0000';}
+.Warn1	{color:'#0000FF';}
+.Info1	{color:'#000000';}
+.Sccss1 {color:'#009600';}
+</STYLE>
+</HEAD>
+<BODY BGCOLOR="white" TEXT="black" LINK="blue" VLINK="purple" BACKGROUND="C:\Aldec\Active-HDL Student Edition\\Flows\Res\default.bmp">
+<FONT FACE="Serif">
+<tt>
+<!--                                                                         -->
+<!--                             END HEADER                                  -->
+<!----------------------------------------------------------------------------->
+
+<!----------------------------------------------------------------------------->
+<!--                            BEGIN VBSCRIPT                               -->
+<!--                                                                         -->
+<SCRIPT LANGUAGE=JSCRIPT>
+	function RollOn() {
+		switch(window.event.srcElement.className) {
+			case 'Err':
+				window.event.srcElement.className = 'ErrH'; break;
+			case 'Warn':
+				window.event.srcElement.className = 'WarnH'; break;
+			case 'Info':
+				window.event.srcElement.className = 'InfoH'; break;
+		}
+	}
+	function RollOff() {
+		switch(window.event.srcElement.className) {
+			case 'ErrH':
+				window.event.srcElement.className = 'Err'; break;
+			case 'WarnH':
+				window.event.srcElement.className = 'Warn'; break;
+			case 'InfoH':
+				window.event.srcElement.className = 'Info'; break;
+		}
+	}
+	function OnError(sMsg,sUrl,sLine) {
+		return true;
+	}
+	
+	document.onmouseover = RollOn;
+	document.onmouseout = RollOff;
+	window.onerror = OnError;
+</SCRIPT>
+
+<SCRIPT LANGUAGE=VBSCRIPT>
+
+Function IID_IDispatch
+	IID_IDispatch = "{00020400-0000-0000-C000-000000000046}"
+End Function
+
+Function CLSID_Executor
+	CLSID_Executor = "Aldec.ExePlugIn.Generic.7"
+End Function
+
+
+Sub OpenPlugIn (progid, template, document, element, string)
+
+	Dim executor, command
+
+	Set executor = window.external.aldec.connector.OpenPlugIn(CLSID_Executor, IID_IDispatch)
+
+	command = "?Activate[<"+progid+">][<"+template+">][<"+document+">][<"+element+">][<"+string+">]"
+
+	executor.ExecuteCommand command, ""
+
+End Sub
+
+
+</SCRIPT>
+<!--                                                                         -->
+<!--                             END VBSCRIPT                                -->
+<!----------------------------------------------------------------------------->
+
+<H2>DRC Report File - blockCordic.bde</H2>
+
+Created on Thu 2015-03-12 at 09:23:49
+<HR NOSHADE COLOR="#008080">
+<SPAN class=Info1>Checking file '\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\blockCordic.bde'.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=5471,5480,5612');">symbol 'adder' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=10147');">symbol 'counter_new' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=7199');">symbol 'createAddr' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=14435');">symbol 'divider' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=11604,12477');">symbol 'extender' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=12525');">symbol 'fix_angle' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=4368,4394');">symbol 'inverter' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=14312');">symbol 'is_valid' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=12098');">symbol 'n_abs' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=4092,4539,4793,4927');">symbol 'n_mux' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=4006,4059,4067');">symbol 'n_register' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=12576,12585');">symbol 'n_shift' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=6974');">symbol 'rom64x32' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=5534,9095,9104');">symbol 'sign' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Warn onclick="OpenPlugIn('Aldec.BDE.7','0','\\\\vmware-host\\shared folders\\scrivania\\progetto\\scheme2\\scheme\\src\\blockCordic.bde','','-errorid=14486');">symbol 'starter' is empty. Compile to the library a source file with a description of symbol contents.</SPAN><BR>
+<SPAN class=Info1>To settle inconsistencies between symbols and their contents apply the Compare Symbol with Contents command to each of the reported symbols.</SPAN><BR>
+<SPAN class=Warn1>blockCordic.bde - 0 error(s), 15 warning(s)</SPAN><BR>
+<SPAN class=Info1>DRC process completed in 2 second(s).</SPAN><BR>
+</tt>
+</FONT>
+       
+        >
+</BODY>
+</HTML>
