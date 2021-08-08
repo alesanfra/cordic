@@ -98,19 +98,6 @@ begin
 				wait for 50 ns;
 			end loop;
 			
-			write(v_OLINE, "rho ");
-			hwrite(v_OLINE, rho);
-			write(v_OLINE, " ");
-			hwrite(v_OLINE, v_rho);
-			write(v_OLINE, "  theta");
-			write(v_OLINE, " ");
-			hwrite(v_OLINE, theta);	   
-			write(v_OLINE, " ");
-			hwrite(v_OLINE, v_theta);
-			write(v_OLINE, "  valid bit ");
-			write(v_OLINE, valid);
-			writeline(OUTPUT, v_OLINE);
-			
 			h_rho := rho(N-1 downto 16);
 			h_theta := theta(N-1 downto 16);
 			
@@ -130,8 +117,7 @@ begin
 		end loop;
 		
 		file_close(file_TEST);
-		write(v_OLINE,"Fine del test");	
-		writeline(OUTPUT,v_OLINE);
+		report "End test";
 		wait;
 	end process;
 end behav;

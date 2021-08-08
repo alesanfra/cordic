@@ -1,5 +1,0 @@
-WARNING DAGGEN_0523: "The source is compiled without the -dbg switch. Line breakpoints and assertion debug will not be available."
-MESSAGE "File: \\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\cordic_tb.vhd" 
-MESSAGE "Compile Entity "cordic_tb"" 
-MESSAGE "Compile Architecture "behav" of Entity "cordic_tb"" 
-SUCCESS "Compile success 0 Errors 0 Warnings  Analysis time :  78.0 [ms]" 

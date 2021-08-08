@@ -1,1 +1,0 @@
--w -s "\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\library.cfg"  -j "\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\projlib.cfg"  -d "\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\compile"   -work scheme  -O3 -e 100 -2002 "\\vmware-host\shared folders\scrivania\progetto\scheme2\scheme\src\cordic_tb.vhd"
